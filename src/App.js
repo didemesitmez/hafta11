@@ -6,15 +6,21 @@ function App() {
   const [anahtar, anahtarGuncelle] = useState("ankara")
   const [url, urlGuncelle] = useState(`https://hn.algolia.com/api/v1/search?query=ankara`)
   const [yukleniyor, yukleniyorGuncelle] = useState(false)
+  const [hata, hataGuncelle] = useState(false)
 
   useEffect(() => {
     const haberCek = async () => {
 
       yukleniyorGuncelle(true)
+      hataGuncelle(false)
+      
+      try {
+        const result = await axios(url)
+        veriGuncelle(result.data)
+      } catch(error) {
+        hataGuncelle(true)
+      }
 
-      const result = await axios(url)
-
-      veriGuncelle(result.data)
       yukleniyorGuncelle(false)
     }
 
@@ -28,7 +34,7 @@ function App() {
   }
 
   function urlDegisimi() {
-    urlGuncelle(`https://hn.algolia.com/api/v1/search?query=${anahtar}`)
+    urlGuncelle(`https://hn.algol.com/api/v1/search?query=${anahtar}`)
   }
 
   console.log("App render edildi")
@@ -47,19 +53,21 @@ function App() {
               </div>
             )
             :
-            (
-              <ul>
-                <li>İLK ELEMAN</li>
-                {
-                  veri.hits.map(haber => (
-                    <li key={haber.objectID}>
-                      <a target='_blank' href={haber.url}>{haber.title}</a>
-                    </li>
-                  ))
-                }
+              !hata && 
+                <ul>
+                  {
+                    veri.hits.map(haber => (
+                      <li key={haber.objectID}>
+                        <a target='_blank' href={haber.url}>{haber.title}</a>
+                      </li>
+                    ))
+                  }
               </ul>
-            )
+            
         }
+
+        { hata && <p className='alert alert-danger'>Hata oluştu.</p>}
+
       </section>
 
     </>
